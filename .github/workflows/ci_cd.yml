@@ -1,0 +1,90 @@
+name: CI - Dockerized Agile Test Pipeline with Security
+
+on:
+  push:
+    branches: [main, "feature/**"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  security:
+    name: 🔒 Security Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: 📦 Install Python requirements
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: 🛡️ Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: python
+          queries: +security-and-quality
+
+      - name: 🛡️ Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+      - name: 📦 Install pip-audit
+        run: |
+          pip install pip-audit
+
+      - name: 🔍 Scan Python dependencies
+        run: |
+          pip-audit
+
+      - name: 🛠️ Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🧱 Build Docker image for scanning
+        run: |
+          docker build -t google-test .
+
+      - name: 🐳 Scan Docker image with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: google-test:latest
+          format: table
+          exit-code: '1'
+          severity: CRITICAL,HIGH
+
+  docker-test:
+    name: 🐳 Run Pytest in Docker
+    runs-on: ubuntu-latest
+    needs: security
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🛠️ Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🧱 Build Docker image
+        run: |
+          docker build -t google-test .
+
+      - name: ✅ Run tests in container
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/app google-test pytest --maxfail=1 --disable-warnings --html=/app/report.html | tee /app/test-output.log
+
+      - name: 📦 Upload Pytest HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-html-report
+          path: report.html
+
+      - name: 📦 Upload pytest console log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-console-log
+          path: test-output.log
