@@ -1,37 +1,46 @@
-Google Test Automation CI/CD Pipeline
-A secure, Dockerized CI/CD pipeline for automated testing of google-related services using Pytest. Runs tests on push/pull requests to main and feature/* branches, with security scans via CodeQL, pip-audit, and Trivy. Generates HTML test reports.
-Features
+# 🚀 Google Test Automation CI/CD Pipeline
 
-Dockerized Testing: Runs Pytest in a Docker container for consistent environments.
-Security Scans: CodeQL for static analysis, pip-audit for dependency checks, Trivy for container vulnerabilities.
-CI/CD: Automated workflows on GitHub Actions for main and feature/* branches.
-Reports: HTML test reports uploaded as artifacts.
+A secure, Dockerized CI/CD pipeline for automated testing of Google-related services using **Pytest**, with integrated security scanning and test reporting via **GitHub Actions**.
 
-Prerequisites
+---
 
-Docker
-GitHub account with repository access
-Python 3.x (matching your Dockerfile)
+## ✅ Features
 
-Setup
+- **🔁 Dockerized Testing**  
+  Runs Pytest in isolated Docker containers to ensure environment consistency across systems.
 
-Clone the repository:git clone https://github.com/MarwanSultan/google_test_automation_ci_cd_pipeline.git
+- **🔐 Security Scanning**  
+  - [CodeQL](https://github.com/github/codeql) for static code analysis  
+  - [pip-audit](https://github.com/pypa/pip-audit) for Python dependency vulnerabilities  
+  - [Trivy](https://github.com/aquasecurity/trivy) for Docker image vulnerability scanning
+
+- **⚙️ CI/CD with GitHub Actions**  
+  - Triggers on `push` to `main` and `feature/*` branches  
+  - Includes `pull_request` events targeting `main`  
+  - Parallel jobs for security scanning and test execution
+
+- **📄 Test Reporting**  
+  Generates and uploads **HTML Pytest reports** as CI artifacts.
+
+---
+
+## 🧰 Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/)
+- [Python 3.x](https://www.python.org/downloads/) (must match `Dockerfile` version)
+- GitHub account with repository access
+
+---
+
+## 🚀 Getting Started
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/MarwanSultan/google_test_automation_ci_cd_pipeline.git
 cd google_test_automation_ci_cd_pipeline
-
-
-Build the Docker image:docker build -t google-test .
-
-
-Run tests locally:docker run --rm -v $(pwd):/app google-test pytest --maxfail=1 --disable-warnings --html=/app/report.html
-
-
-
-CI/CD Workflow
-
-Triggers: Runs on push to main or feature/* and pull_request to main.
-Jobs:
-security: Scans code (CodeQL), dependencies (pip-audit), and Docker image (Trivy).
-docker-test: Executes Pytest in Docker, uploads HTML report.
-
-
-Security: Enable secret scanning, Dependabot, and branch protection in GitHub Settings.
+```
+### 1. Build and run the docker image.
+docker build -t google-test .
+docker run --rm -v $(pwd):/app google-test pytest \
+  --maxfail=1 --disable-warnings --html=/app/report.html
