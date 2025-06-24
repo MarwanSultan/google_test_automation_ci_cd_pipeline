@@ -2,19 +2,19 @@ FROM python:3.11-slim
 
 WORKDIR /google_test_automation
 
-# Install Chrome dependencies
-RUN apt-get update && apt-get install -y \
-    wget unzip xvfb libxi6 libgconf-2-4 libnss3 libxss1 libasound2 \
-    fonts-liberation libappindicator3-1 libatk-bridge2.0-0 libgtk-3-0 libx11-xcb1
+# Install any system dependencies you might need for API testing (optional)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    wget \
+    unzip \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install Chrome
-RUN apt-get update && apt-get install -y chromium
-
-#Copy requirements and install
+# Copy requirements and install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-#Copy project files
+# Copy your project files
 COPY . .
 
-CMD ["python", "-m", "pytest", "tests", "--html=report.html", "--self-contained-html"]
+# Run pytest by default
+CMD ["pytest", "tests", "--html=report.html", "--self-contained-html"]

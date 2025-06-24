@@ -1,25 +1,33 @@
+# conftest.py
 import pytest
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service as ChromeService
-from webdriver_manager.chrome import ChromeDriverManager
+import requests
+
+BASE_URL = "https://jsonplaceholder.typicode.com"
+
+
+@pytest.fixture(scope="session")
+def base_url():
+    return BASE_URL
 
 
 @pytest.fixture(scope="function")
-def driver():
-    # Set Chrome options for headless execution
-    options = Options()
-    options.add_argument("--headless")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--window-size=1920,1080")
+def client():
+    session = requests.Session()
+    session.headers.update({"Content-Type": "application/json"})
+    yield session
+    session.close()
 
-    # Setup Chrome WebDriver
-    service = ChromeService(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options=options)
-    driver.implicitly_wait(10)  # Best practice: set an implicit wait
 
-    yield driver
+# ----------- TEST SETUP & TEARDOWN ------------ #
 
-    # Teardown: close the browser after each test
-    driver.quit()
+@pytest.fixture(scope="function", autouse=True)
+def setup_and_teardown(client, base_url):
+    print("\n[Setup] Preparing test environment...")
+    # Example: Call setup endpoint if available
+    # client.post(f"{base_url}/test/setup", json={"reset": True})
+
+    yield
+
+    print("[Teardown] Cleaning up test environment...")
+    # Example: Call teardown endpoint if available
+    # client.post(f"{base_url}/test/teardown", json={"cleanup": True})
