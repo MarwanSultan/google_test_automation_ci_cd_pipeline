@@ -88,3 +88,13 @@ jobs:
         with:
           name: pytest-console-log
           path: test-output.log
+
+      - name: Setup Kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: Validate Kubernetes Cluster
+        run: |
+          kubectl cluster-info
+          kubectl get nodes
+          kubectl get pods -A
+
